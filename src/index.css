@@ -89,9 +89,26 @@
   .thin-scroll::-webkit-scrollbar-track { background: transparent; }
 }
 
+/* Print view: renderizzato ma fuori schermo su video (così è misurabile per lo zoom-to-fit) */
+#print-view {
+  position: fixed;
+  left: -10000px;
+  top: 0;
+  width: 277mm; /* area utile A4 orizzontale con margini 10mm */
+  background: #fff;
+}
+
 @media print {
   body { background: #fff !important; }
   #root { display: none !important; }
-  #print-view { display: block !important; }
+  #print-view {
+    position: static !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 277mm;
+    transform-origin: top left;
+  }
+  /* i totali/righe non si spezzano tra le pagine */
+  #print-view tr { page-break-inside: avoid; }
   @page { size: A4 landscape; margin: 10mm; }
 }

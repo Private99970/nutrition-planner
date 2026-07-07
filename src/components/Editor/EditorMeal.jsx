@@ -1,14 +1,20 @@
+import { useState } from 'react'
 import { calcMealMacro, calcMacro, r0, r1 } from '../../hooks/useMacro'
 import FoodSearch from './FoodSearch'
-import { SS, GG } from '../../data/diets'
+import { MEAL_DEFS, GG } from '../../data/diets'
 
 export default function EditorMeal({ meal, foods, curDay, catalog, onUpdateGrams, onRemoveFood, onAddFood, onCopyMealTo }) {
   const mm = calcMealMacro(foods, catalog)
 
-  const handleCopyMeal = (targetDay) => {
+  // Destinazione copia: giorno (default = giorno successivo) e pasto (default = stesso pasto)
+  const [copyDay, setCopyDay] = useState(curDay === 6 ? 0 : curDay + 1)
+  const [copyMeal, setCopyMeal] = useState(meal.id)
+
+  const handleCopyMeal = () => {
     if (foods.length === 0) { alert('Il pasto è vuoto, nulla da copiare.'); return }
-    const msg = `Copia ${meal.label} di ${GG[curDay]} → ${GG[targetDay]}?\n\nIl pasto di destinazione verrà sovrascritto se presente.`
-    if (window.confirm(msg)) onCopyMealTo(meal.id, targetDay)
+    const dstLabel = MEAL_DEFS.find(m => m.id === copyMeal)?.label || copyMeal
+    const msg = `Copia ${meal.label} di ${GG[curDay]} → ${dstLabel} di ${GG[copyDay]}?\n\nIl pasto di destinazione verrà sovrascritto se presente.`
+    if (window.confirm(msg)) onCopyMealTo(meal.id, copyDay, copyMeal)
   }
 
   return (
@@ -31,20 +37,29 @@ export default function EditorMeal({ meal, foods, curDay, catalog, onUpdateGrams
             {r0(mm.k)} kcal
           </span>
         </div>
-        {/* Row 2: copy buttons (wrap, aligned after label) */}
-        <div className="flex items-start gap-1.5 mt-1.5">
-          <span className="text-[10px] text-slate-400 flex-shrink-0 pt-0.5">Copia in:</span>
-          <div className="flex flex-wrap gap-1.5">
-            {SS.map((d, i) => i !== curDay && (
-              <button
-                key={i}
-                onClick={() => handleCopyMeal(i)}
-                className="px-2 py-0.5 rounded-full text-[10px] font-bold border border-bdr2 text-slate-500 hover:bg-ind hover:border-ind hover:text-white transition-all"
-              >
-                {d}
-              </button>
-            ))}
-          </div>
+        {/* Row 2: copia pasto in giorno + pasto qualsiasi */}
+        <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+          <span className="text-[10px] text-slate-400 flex-shrink-0">Copia in:</span>
+          <select
+            value={copyDay}
+            onChange={e => setCopyDay(parseInt(e.target.value))}
+            className="text-[10.5px] font-semibold rounded-lg border border-bdr2 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white px-1.5 py-1 outline-none focus:border-ind"
+          >
+            {GG.map((g, i) => <option key={i} value={i}>{g}</option>)}
+          </select>
+          <select
+            value={copyMeal}
+            onChange={e => setCopyMeal(e.target.value)}
+            className="text-[10.5px] font-semibold rounded-lg border border-bdr2 dark:border-slate-600 bg-white dark:bg-slate-700 dark:text-white px-1.5 py-1 outline-none focus:border-ind"
+          >
+            {MEAL_DEFS.map(m => <option key={m.id} value={m.id}>{m.label}</option>)}
+          </select>
+          <button
+            onClick={handleCopyMeal}
+            className="px-2.5 py-1 rounded-lg text-[10.5px] font-bold bg-ind text-white hover:bg-indigo-700 transition-colors"
+          >
+            Copia
+          </button>
         </div>
       </div>
 

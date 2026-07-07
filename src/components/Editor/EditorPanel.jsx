@@ -118,10 +118,11 @@ export default function EditorPanel({
     scheduleAutoSave()
   }
 
-  const copyMealTo = (mealId, targetDay) => {
+  const copyMealTo = (sourceMealId, targetDay, targetMealId) => {
+    const dstMeal = targetMealId || sourceMealId
     setDays(prev => {
       const next = prev.map((d, di) => di !== targetDay ? d : {
-        ...d, [mealId]: JSON.parse(JSON.stringify(prev[curDay][mealId] || []))
+        ...d, [dstMeal]: JSON.parse(JSON.stringify(prev[curDay][sourceMealId] || []))
       })
       return next
     })

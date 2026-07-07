@@ -1,9 +1,43 @@
+import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { calcDayMacro, calcMealMacro, r0, kcalTarget } from '../hooks/useMacro'
 import { MEAL_DEFS, GG } from '../data/diets'
 
+// Adatta automaticamente la stampa a UNA sola pagina A4 orizzontale (zoom-to-fit).
+function useFitToPage() {
+  useEffect(() => {
+    const mmToPx = (mm) => (mm * 96) / 25.4
+    const before = () => {
+      const el = document.getElementById('print-view')
+      if (!el) return
+      el.style.zoom = '1'
+      el.style.width = '277mm'
+      // altezza A4 orizzontale (210mm) meno margini 10mm + un piccolo margine di sicurezza
+      const availH = mmToPx(210 - 20 - 4)
+      const h = el.scrollHeight
+      if (h > availH) {
+        const s = Math.max(0.4, availH / h)
+        el.style.zoom = String(s)
+        // allarga il contenuto così, una volta rimpicciolito, riempie la larghezza del foglio
+        el.style.width = (276 / s) + 'mm'
+      }
+    }
+    const after = () => {
+      const el = document.getElementById('print-view')
+      if (el) { el.style.zoom = '1'; el.style.width = '277mm' }
+    }
+    window.addEventListener('beforeprint', before)
+    window.addEventListener('afterprint', after)
+    return () => {
+      window.removeEventListener('beforeprint', before)
+      window.removeEventListener('afterprint', after)
+    }
+  }, [])
+}
+
 function PrintContent({ diet, name, catalog }) {
   const t = diet.targets
+  useFitToPage()
 
   return (
     <div id="print-view">

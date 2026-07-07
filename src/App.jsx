@@ -11,7 +11,7 @@ import PrintView from './components/PrintView'
 import { MEAL_DEFS, GG } from './data/diets'
 
 export default function App() {
-  const { diets, dietNames, saveDiet, deleteDiet, draft, saveDraft, clearDraft } = useDiets()
+  const { diets, dietNames, saveDiet, deleteDiet, draft, saveDraft, clearDraft, exportDiets, importDiets } = useDiets()
   const catalogState = useCatalog()
 
   const [curDietIdx, setCurDietIdx] = useState(0)
@@ -89,6 +89,8 @@ export default function App() {
         onNewDiet={() => openEditor(null)}
         onOpenCatalog={() => setCatalogOpen(true)}
         onPrint={() => window.print()}
+        onExport={exportDiets}
+        onImport={importDiets}
       />
 
       <DayTabs
